@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:hangman_game/screens/difficulty_screen.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
 import 'package:hangman_game/models/game.dart';
@@ -74,10 +75,9 @@ class _GameScreenState extends State<GameScreen> {
   void checkEndOfGame() {
     if (widget.game.isGameOver()) {
       _stopTimer();
-      final title =
-          widget.game.hasPlayerWon()
-            ? 'Congratulations!\n\nWord: ${widget.wordToBeGuessed.text.toUpperCase()}'
-            : 'Game Over.\n\nWord: ${widget.wordToBeGuessed.text.toUpperCase()}';
+      final title = widget.game.hasPlayerWon()
+          ? 'Congratulations!\n\nWord: ${widget.wordToBeGuessed.text.toUpperCase()}'
+          : 'Game Over.\n\nWord: ${widget.wordToBeGuessed.text.toUpperCase()}';
       final desc = widget.game.hasPlayerWon()
           ? 'You won the game. Play again?'
           : 'You lost the game. Try again?';
@@ -90,9 +90,8 @@ class _GameScreenState extends State<GameScreen> {
         buttons: [
           DialogButton(
             onPressed: () => {
-              dispose(),
               Navigator.pop(context),
-              Navigator.pop(context),
+              resetGame(),
             },
             width: 128,
             child: const Text(
@@ -104,6 +103,15 @@ class _GameScreenState extends State<GameScreen> {
       ).show();
     }
   }
+
+  void resetGame() {
+  Navigator.pushAndRemoveUntil(
+    context,
+    MaterialPageRoute(builder: (context) => const DifficultyScreen()),
+    (Route<dynamic> route) => false,
+  );
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -168,20 +176,21 @@ class _GameScreenState extends State<GameScreen> {
                   ),
                 ),
               ),
-              // Expanded(
-              //   flex: 1,
-              //   child: Center(
-              //     child: Text(
-              //       widget.game.word.text,
-              //     ),
-              //   ),
-              // ),
+              Expanded(
+                flex: 1,
+                child: Center(
+                  child: Text(
+                    widget.game.word.text,
+                  ),
+                ),
+              ),
               Expanded(
                 flex: 4,
                 child: AlphabetKeyPad(
                   game: widget.game,
                   wordToBeGuessed: widget.wordToBeGuessed,
                   onLetterPressed: onLetterPressed,
+                  checkEndOfGameCallback: checkEndOfGame,
                 ),
               )
             ],
@@ -196,12 +205,14 @@ class AlphabetKeyPad extends StatefulWidget {
   final Word wordToBeGuessed;
   final Game game;
   final Function(String letter) onLetterPressed;
+  final Function() checkEndOfGameCallback;
 
   const AlphabetKeyPad({
     super.key,
     required this.wordToBeGuessed,
     required this.game,
     required this.onLetterPressed,
+    required this.checkEndOfGameCallback,
   });
 
   @override
@@ -212,6 +223,26 @@ class _AlphabetKeyPadState extends State<AlphabetKeyPad> {
   final List<String> letters =
       List.generate(26, (index) => String.fromCharCode(index + 65));
   List<bool> tappedLetters = List.generate(27, (index) => false);
+
+  void submitWordGuess(String guess) {
+    final isCorrectGuess =
+        guess.toLowerCase() == widget.wordToBeGuessed.text.toLowerCase();
+    if (isCorrectGuess) {
+      widget.game.word.lettersRevealed = List.generate(
+        widget.wordToBeGuessed.text.length - 1,
+        (index) => true,
+      );
+    } else {
+      widget.game.incorrectGuesses = 6;
+    }
+    setState(() {
+      tappedLetters[letters.length] = true;
+    });
+    widget.checkEndOfGameCallback();
+    if(mounted) {      
+      Navigator.pop(context);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -249,7 +280,35 @@ class _AlphabetKeyPadState extends State<AlphabetKeyPad> {
                           setState(() {
                             tappedLetters[letters.length] = true;
                           });
-                          // TODO 1: Handle 'WORD' button tap
+                          final TextEditingController textFieldController =
+                              TextEditingController();
+                          Alert(
+                              context: context,
+                              title: "Enter your guess",
+                              content: Column(
+                                children: <Widget>[
+                                  TextField(
+                                    controller: textFieldController,
+                                    decoration: const InputDecoration(
+                                      icon: Icon(Icons.text_fields),
+                                      labelText: 'Word',
+                                    ),
+                                    autofocus: true,
+                                  ),
+                                ],
+                              ),
+                              buttons: [
+                                DialogButton(
+                                  onPressed: () {
+                                    submitWordGuess(textFieldController.text);
+                                  },
+                                  child: const Text(
+                                    "Submit",
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: 16),
+                                  ),
+                                )
+                              ]).show();
                         },
                   style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(
