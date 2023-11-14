@@ -36,6 +36,22 @@ final normalTextStyle = GoogleFonts.patrickHand(
   wordSpacing: 1.5,
 );
 
+final smallHeaderStyle = GoogleFonts.patrickHand(
+  fontSize: 24.0,
+  fontWeight: FontWeight.bold,
+  color: mainTextColor,
+  letterSpacing: 1.5,
+  wordSpacing: 1.5,
+);
+
+final smallTextStyle = GoogleFonts.patrickHand(
+  fontSize: 16.0,
+  fontWeight: FontWeight.bold,
+  color: mainTextColor,
+  letterSpacing: 1.5,
+  wordSpacing: 1.5,
+);
+
 final buttonTextStyle = GoogleFonts.patrickHand(
   fontSize: 24.0,
   fontWeight: FontWeight.bold,

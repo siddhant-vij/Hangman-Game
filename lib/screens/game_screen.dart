@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
-import 'package:hangman_game/hangman_game.dart';
+import 'package:hangman_game/screens/difficulty_screen.dart';
 import 'package:hangman_game/models/score.dart';
 import 'package:hangman_game/services/score_service.dart';
 import 'package:hangman_game/models/game.dart';
@@ -52,12 +52,6 @@ class _GameScreenState extends State<GameScreen> {
     _timer.cancel();
   }
 
-  @override
-  void dispose() {
-    _stopTimer();
-    super.dispose();
-  }
-
   String getTimerInFormat() {
     final minutes = (_elapsedTime ~/ 60).toString().padLeft(2, '0');
     final seconds = (_elapsedTime % 60).toString().padLeft(2, '0');
@@ -83,9 +77,9 @@ class _GameScreenState extends State<GameScreen> {
       _stopTimer();
       if (mounted) {
         showEndOfGameDialog();
-      }
-      if (widget.game.hasPlayerWon()) {
-        await saveScore();
+        if (widget.game.hasPlayerWon()) {
+          await saveScore();
+        }
       }
     }
   }
@@ -101,6 +95,8 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   void showEndOfGameDialog() {
+    if (!mounted) return;
+
     final title = widget.game.hasPlayerWon()
         ? 'Congratulations!\n\nWord: ${widget.wordToBeGuessed.text.toUpperCase()}'
         : 'Game Over.\n\nWord: ${widget.wordToBeGuessed.text.toUpperCase()}';
@@ -113,11 +109,12 @@ class _GameScreenState extends State<GameScreen> {
       type: widget.game.hasPlayerWon() ? AlertType.success : AlertType.error,
       title: title,
       desc: desc,
+      closeFunction: () {},
       buttons: [
         DialogButton(
-          onPressed: () => {
-            Navigator.pop(context),
-            resetGame(),
+          onPressed: () {
+            Navigator.of(context, rootNavigator: true).pop();
+            resetGame();
           },
           width: 128,
           child: const Text(
@@ -130,9 +127,11 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   void resetGame() {
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => const HangmanGame()),
+    if (!mounted) return;
+
+    Navigator.of(context).popUntil((route) => route.isFirst);
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => const DifficultyScreen()),
       (Route<dynamic> route) => false,
     );
   }
@@ -258,22 +257,31 @@ class _AlphabetKeyPadState extends State<AlphabetKeyPad> {
   List<bool> tappedLetters = List.generate(27, (index) => false);
 
   void submitWordGuess(String guess) {
-    final isCorrectGuess =
-        guess.toLowerCase() == widget.wordToBeGuessed.text.toLowerCase();
-    if (isCorrectGuess) {
-      widget.game.word.lettersRevealed = List.generate(
-        widget.wordToBeGuessed.text.length - 1,
-        (index) => true,
-      );
-    } else {
-      widget.game.incorrectGuesses = 6;
+    if (guess.trim().isEmpty) {
+      return;
     }
-    setState(() {
-      tappedLetters[letters.length] = true;
-    });
-    widget.checkEndOfGameCallback();
+    final isCorrectGuess =
+        guess.trim().toLowerCase() == widget.wordToBeGuessed.text.toLowerCase();
+
+    FocusScope.of(context).unfocus();
+    Navigator.of(context, rootNavigator: true).pop();
+
     if (mounted) {
-      Navigator.pop(context);
+      setState(() {
+        if (isCorrectGuess) {
+          widget.game.word.lettersRevealed =
+              List.filled(widget.game.word.text.length, true);
+        } else {
+          widget.game.incorrectGuesses = 6;
+        }
+        tappedLetters.fillRange(0, tappedLetters.length, true);
+      });
+
+      Future.delayed(Duration.zero, () {
+        if (mounted) {
+          widget.checkEndOfGameCallback();
+        }
+      });
     }
   }
 
@@ -318,6 +326,7 @@ class _AlphabetKeyPadState extends State<AlphabetKeyPad> {
                           Alert(
                               context: context,
                               title: "Enter your guess",
+                              closeFunction: () {},
                               content: Column(
                                 children: <Widget>[
                                   TextField(
