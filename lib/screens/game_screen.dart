@@ -209,14 +209,6 @@ class _GameScreenState extends State<GameScreen> {
                 ),
               ),
               Expanded(
-                flex: 1,
-                child: Center(
-                  child: Text(
-                    widget.game.word.text,
-                  ),
-                ),
-              ),
-              Expanded(
                 flex: 4,
                 child: AlphabetKeyPad(
                   game: widget.game,
