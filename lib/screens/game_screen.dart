@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
+import 'package:hangman_game/hangman_game.dart';
 import 'package:hangman_game/models/score.dart';
 import 'package:hangman_game/services/score_service.dart';
 import 'package:hangman_game/models/game.dart';
 import 'package:hangman_game/models/word.dart';
 import 'package:hangman_game/services/game_service.dart';
 import 'package:hangman_game/utils/constants.dart';
-import 'package:hangman_game/screens/difficulty_screen.dart';
 
 class GameScreen extends StatefulWidget {
   final Word wordToBeGuessed;
@@ -132,9 +132,17 @@ class _GameScreenState extends State<GameScreen> {
   void resetGame() {
     Navigator.pushAndRemoveUntil(
       context,
-      MaterialPageRoute(builder: (context) => const DifficultyScreen()),
+      MaterialPageRoute(builder: (context) => const HangmanGame()),
       (Route<dynamic> route) => false,
     );
+  }
+
+  void onHintPressed() {
+    if (!widget.game.hintUsed) {
+      setState(() {
+        gameService.useHint(widget.game);
+      });
+    }
   }
 
   @override
@@ -167,13 +175,14 @@ class _GameScreenState extends State<GameScreen> {
                       style: normalTextStyle,
                     ),
                     TextButton(
-                      onPressed: () {},
-                      child: const Icon(
+                      onPressed: widget.game.hintUsed ? null : onHintPressed,
+                      child: Icon(
                         Icons.lightbulb,
                         size: 32.0,
-                        color: mainTextColor,
+                        color:
+                            widget.game.hintUsed ? Colors.grey : mainTextColor,
                       ),
-                    )
+                    ),
                   ],
                 ),
               ),
@@ -216,7 +225,7 @@ class _GameScreenState extends State<GameScreen> {
                   onLetterPressed: onLetterPressed,
                   checkEndOfGameCallback: checkEndOfGame,
                 ),
-              )
+              ),
             ],
           ),
         ),
@@ -356,8 +365,13 @@ class _AlphabetKeyPadState extends State<AlphabetKeyPad> {
   }
 
   Widget createButton(int index) {
+    bool isLetterRevealed = widget.game.word.text.toUpperCase().split('').any(
+        (letter) =>
+            letter == letters[index] &&
+            widget.game.word.lettersRevealed[
+                widget.game.word.text.toUpperCase().indexOf(letter)]);
     return ElevatedButton(
-      onPressed: tappedLetters[index]
+      onPressed: tappedLetters[index] || isLetterRevealed
           ? null
           : () {
               setState(() {

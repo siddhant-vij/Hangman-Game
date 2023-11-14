@@ -33,21 +33,29 @@ class GameService {
     return revealedWord;
   }
 
-  bool toRevealHintLetter(Game game) {
-    if (game.hintUsed) {
-      return false;
-    }
-    return true;
-  }
+  void useHint(Game game) {
+    if (!game.hintUsed) {
+      final random = Random();
+      String letter;
+      Set<int> unrevealedIndices = {};
 
-  String revealHintLetter(Game game) {
-    final random = Random();
-    int index;
-    do {
-      index = random.nextInt(game.word.text.length);
-    } while (game.word.lettersRevealed[index]);
-    game.word.lettersRevealed[index] = true;
-    game.hintUsed = true;
-    return game.word.text[index];
+      for (int i = 0; i < game.word.text.length; i++) {
+        if (!game.word.lettersRevealed[i]) {
+          unrevealedIndices.add(i);
+        }
+      }
+
+      if (unrevealedIndices.isNotEmpty) {
+        int randomIndex = unrevealedIndices
+            .elementAt(random.nextInt(unrevealedIndices.length));
+        letter = game.word.text[randomIndex].toUpperCase();
+        for (int i = 0; i < game.word.text.length; i++) {
+          if (game.word.text[i].toUpperCase() == letter) {
+            game.word.lettersRevealed[i] = true;
+          }
+        }
+        game.hintUsed = true;
+      }
+    }
   }
 }
