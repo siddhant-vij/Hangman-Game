@@ -13,6 +13,7 @@ dependencies:
   google_fonts: ^6.1.0
   rflutter_alert: ^2.0.7
   path_provider: ^2.1.1
+  intl: ^0.18.1
 
 dev_dependencies:
   flutter_test:
@@ -24,4 +25,3 @@ flutter:
   assets:
     - images/
     - assets/
-    - data/

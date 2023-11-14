@@ -1,22 +1,27 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:hangman_game/screens/difficulty_screen.dart';
+import 'package:intl/intl.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
+import 'package:hangman_game/models/score.dart';
+import 'package:hangman_game/services/score_service.dart';
 import 'package:hangman_game/models/game.dart';
 import 'package:hangman_game/models/word.dart';
 import 'package:hangman_game/services/game_service.dart';
 import 'package:hangman_game/utils/constants.dart';
+import 'package:hangman_game/screens/difficulty_screen.dart';
 
 class GameScreen extends StatefulWidget {
   final Word wordToBeGuessed;
   final Game game;
+  final Difficulty difficulty;
 
   const GameScreen({
     super.key,
     required this.wordToBeGuessed,
     required this.game,
+    required this.difficulty,
   });
 
   @override
@@ -27,6 +32,7 @@ class _GameScreenState extends State<GameScreen> {
   int _elapsedTime = 0;
   late Timer _timer;
   final gameService = GameService();
+  final scoreService = ScoreService();
 
   @override
   void initState() {
@@ -72,46 +78,64 @@ class _GameScreenState extends State<GameScreen> {
     });
   }
 
-  void checkEndOfGame() {
+  void checkEndOfGame() async {
     if (widget.game.isGameOver()) {
       _stopTimer();
-      final title = widget.game.hasPlayerWon()
-          ? 'Congratulations!\n\nWord: ${widget.wordToBeGuessed.text.toUpperCase()}'
-          : 'Game Over.\n\nWord: ${widget.wordToBeGuessed.text.toUpperCase()}';
-      final desc = widget.game.hasPlayerWon()
-          ? 'You won the game. Play again?'
-          : 'You lost the game. Try again?';
-
-      Alert(
-        context: context,
-        type: widget.game.hasPlayerWon() ? AlertType.success : AlertType.error,
-        title: title,
-        desc: desc,
-        buttons: [
-          DialogButton(
-            onPressed: () => {
-              Navigator.pop(context),
-              resetGame(),
-            },
-            width: 128,
-            child: const Text(
-              'Restart',
-              style: TextStyle(color: Colors.white, fontSize: 16),
-            ),
-          ),
-        ],
-      ).show();
+      if (mounted) {
+        showEndOfGameDialog();
+      }
+      if (widget.game.hasPlayerWon()) {
+        await saveScore();
+      }
     }
   }
 
-  void resetGame() {
-  Navigator.pushAndRemoveUntil(
-    context,
-    MaterialPageRoute(builder: (context) => const DifficultyScreen()),
-    (Route<dynamic> route) => false,
-  );
-}
+  Future<void> saveScore() async {
+    final scoreService = ScoreService();
+    final newScore = Score(
+      date: DateFormat('dd-MM-yyyy').format(DateTime.now()),
+      time: _elapsedTime,
+      difficulty: widget.difficulty,
+    );
+    await scoreService.addScore(newScore);
+  }
 
+  void showEndOfGameDialog() {
+    final title = widget.game.hasPlayerWon()
+        ? 'Congratulations!\n\nWord: ${widget.wordToBeGuessed.text.toUpperCase()}'
+        : 'Game Over.\n\nWord: ${widget.wordToBeGuessed.text.toUpperCase()}';
+    final desc = widget.game.hasPlayerWon()
+        ? 'You won the game. Play again?'
+        : 'You lost the game. Try again?';
+
+    Alert(
+      context: context,
+      type: widget.game.hasPlayerWon() ? AlertType.success : AlertType.error,
+      title: title,
+      desc: desc,
+      buttons: [
+        DialogButton(
+          onPressed: () => {
+            Navigator.pop(context),
+            resetGame(),
+          },
+          width: 128,
+          child: const Text(
+            'Restart',
+            style: TextStyle(color: Colors.white, fontSize: 16),
+          ),
+        ),
+      ],
+    ).show();
+  }
+
+  void resetGame() {
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const DifficultyScreen()),
+      (Route<dynamic> route) => false,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -239,7 +263,7 @@ class _AlphabetKeyPadState extends State<AlphabetKeyPad> {
       tappedLetters[letters.length] = true;
     });
     widget.checkEndOfGameCallback();
-    if(mounted) {      
+    if (mounted) {
       Navigator.pop(context);
     }
   }

@@ -53,6 +53,7 @@ class _DifficultyScreenState extends State<DifficultyScreen> {
           builder: (context) => GameScreen(
             wordToBeGuessed: wordToBeGuessed,
             game: game,
+            difficulty: difficulty,
           ),
         ),
       );

@@ -6,36 +6,25 @@ import 'package:hangman_game/models/score.dart';
 import 'package:hangman_game/utils/constants.dart';
 
 class ScoreService {
-  late File _file;
-  final List<Score> _scores;
-  final bool isDevelopment;
+  final Map<Difficulty, List<Score>> _scoresByDifficulty = {
+    Difficulty.easy: [],
+    Difficulty.medium: [],
+    Difficulty.hard: [],
+  };
 
-  ScoreService({this.isDevelopment = true}) : _scores = [];
+  ScoreService();
 
-  Future<File> _getDevFile() async {
-    final path = '${Directory.current.path}/data/scores.csv';
-    final file = File(path);
-    if (!await file.parent.exists()) {
-      await file.parent.create(recursive: true);
-    }
-    return file;
+  Future<File> get _file async {
+    return await _getFile();
   }
 
-  Future<File> _getProdFile() async {
+  Future<File> _getFile() async {
     final directory = await getApplicationDocumentsDirectory();
     final path = '${directory.path}/scores.csv';
     return File(path);
   }
 
-  Future<File> _getFile() {
-    if (isDevelopment) {
-      return _getDevFile();
-    } else {
-      return _getProdFile();
-    }
-  }
-
-  Future<void> _ensureFileExists() async {
+  Future<void> ensureFileExists() async {
     final file = await _getFile();
     if (!await file.exists()) {
       await file.create(recursive: true);
@@ -55,29 +44,62 @@ class ScoreService {
   }
 
   Future<void> saveScores() async {
-    await _ensureFileExists();
+    await ensureFileExists();
+    final file = await _file;
     final buffer = StringBuffer();
-    buffer.writeln('Date, Time');
+    buffer.writeln('Date,Time,Difficulty');
 
-    _scores.sort((a, b) => a.time.compareTo(b.time));
+    _scoresByDifficulty.forEach((difficulty, scores) {
+      scores.sort((a, b) => a.time.compareTo(b.time));
+      scores.take(numberOfScoresToSave).forEach((score) {
+        buffer.writeln(
+            '${score.date},${getTimerInFormat(score.time)},${score.difficulty.toString().split('.').last}');
+      });
+    });
 
-    for (final score in _scores.take(numberOfScoresToSave)) {
-      buffer.writeln('${score.date},${getTimerInFormat(score.time)}');
-    }
-    await _file.writeAsString(buffer.toString());
+    await file.writeAsString(buffer.toString());
   }
 
-  Future<List<Score>> loadScores() async {
-    await _ensureFileExists();
-    final lines = await _file.readAsLines();
-    _scores.clear();
+  Future<void> addScore(Score score) async {
+    await ensureFileExists();
+    await loadScores();
+    final scores = _scoresByDifficulty[score.difficulty] ?? [];
+    scores.add(score);
+    scores.sort((a, b) => a.time.compareTo(b.time));
+    _scoresByDifficulty[score.difficulty] =
+        scores.take(numberOfScoresToSave).toList();
+    await saveScores();
+  }
+
+  Future<Map<Difficulty, List<Score>>> loadScores() async {
+    final file = await _file;
+    final lines = await file.readAsLines();
+    _scoresByDifficulty.forEach((key, value) => value.clear());
+
     for (final line in lines.skip(1)) {
       final values = line.split(',');
-      _scores.add(Score(
-        date: values[0],
-        time: getTimerInSeconds(values[1]),
-      ));
+      if (values.length == 3) {
+        final score = Score(
+          date: values[0],
+          time: getTimerInSeconds(values[1]),
+          difficulty: _parseDifficulty(values[2]),
+        );
+        _scoresByDifficulty[score.difficulty]?.add(score);
+      }
     }
-    return _scores;
+
+    _scoresByDifficulty.forEach((difficulty, scores) {
+      scores.sort((a, b) => a.time.compareTo(b.time));
+    });
+
+    return _scoresByDifficulty;
+  }
+
+  Difficulty _parseDifficulty(String difficultyString) {
+    return Difficulty.values.firstWhere(
+      (d) => d.toString().split('.').last == difficultyString,
+      orElse: () =>
+          throw ArgumentError('Invalid difficulty level: $difficultyString'),
+    );
   }
 }

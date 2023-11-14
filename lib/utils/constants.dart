@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 const wordsFilePath = 'assets/dictionary.txt';
-const scoreFilePath = 'data/scores.csv';
 
 const numberOfScoresToSave = 5;
-const minLengthEasy = 1;
-const maxLengthEasy = 5;
-const minLengthMedium = 6;
-const maxLengthMedium = 8;
-const minLengthHard = 9;
+const minLengthEasy = 3;
+const maxLengthEasy = 6;
+const minLengthMedium = 7;
+const maxLengthMedium = 10;
+const minLengthHard = 11;
 
 enum Difficulty {
   easy,
