@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
+import 'package:hangman_game/utils/size_config.dart';
 import 'package:hangman_game/screens/difficulty_screen.dart';
 import 'package:hangman_game/models/score.dart';
 import 'package:hangman_game/services/score_service.dart';
@@ -116,10 +117,13 @@ class _GameScreenState extends State<GameScreen> {
             Navigator.of(context, rootNavigator: true).pop();
             resetGame();
           },
-          width: 128,
-          child: const Text(
+          width: getWidth(128.0),
+          child: Text(
             'Restart',
-            style: TextStyle(color: Colors.white, fontSize: 16),
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: getHeight(16.0),
+            ),
           ),
         ),
       ],
@@ -150,7 +154,10 @@ class _GameScreenState extends State<GameScreen> {
       home: Scaffold(
         backgroundColor: mainBackgroundColor,
         body: SafeArea(
-          minimum: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 24.0),
+          minimum: EdgeInsets.symmetric(
+            horizontal: getWidth(24.0),
+            vertical: getHeight(24.0),
+          ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
@@ -163,9 +170,9 @@ class _GameScreenState extends State<GameScreen> {
                       onPressed: () {
                         Navigator.pop(context);
                       },
-                      child: const Icon(
+                      child: Icon(
                         Icons.arrow_back,
-                        size: 32.0,
+                        size: getHeight(32.0),
                         color: mainTextColor,
                       ),
                     ),
@@ -177,7 +184,7 @@ class _GameScreenState extends State<GameScreen> {
                       onPressed: widget.game.hintUsed ? null : onHintPressed,
                       child: Icon(
                         Icons.lightbulb,
-                        size: 32.0,
+                        size: getHeight(32.0),
                         color:
                             widget.game.hintUsed ? Colors.grey : mainTextColor,
                       ),
@@ -287,7 +294,10 @@ class _AlphabetKeyPadState extends State<AlphabetKeyPad> {
               for (int i = 0; i < 7; i++)
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.all(4.0),
+                    padding: EdgeInsets.symmetric(
+                      vertical: getHeight(4.0),
+                      horizontal: getWidth(4.0),
+                    ),
                     child: createButton(row * 7 + i),
                   ),
                 ),
@@ -298,14 +308,20 @@ class _AlphabetKeyPadState extends State<AlphabetKeyPad> {
             for (int i = 21; i < 26; i++)
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.all(4.0),
+                  padding: EdgeInsets.symmetric(
+                    vertical: getHeight(4.0),
+                    horizontal: getWidth(4.0),
+                  ),
                   child: createButton(i),
                 ),
               ),
             Expanded(
               flex: 2,
               child: Padding(
-                padding: const EdgeInsets.all(4.0),
+                padding: EdgeInsets.symmetric(
+                  vertical: getHeight(4.0),
+                  horizontal: getWidth(4.0),
+                ),
                 child: ElevatedButton(
                   onPressed: tappedLetters.last
                       ? null
@@ -336,25 +352,34 @@ class _AlphabetKeyPadState extends State<AlphabetKeyPad> {
                                   onPressed: () {
                                     submitWordGuess(textFieldController.text);
                                   },
-                                  child: const Text(
+                                  child: Text(
                                     "Submit",
                                     style: TextStyle(
-                                        color: Colors.white, fontSize: 16),
+                                      color: Colors.white,
+                                      fontSize: getHeight(16.0),
+                                    ),
                                   ),
                                 )
                               ]).show();
                         },
                   style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16.0),
+                      borderRadius: BorderRadius.circular(
+                        getRadius(16.0),
+                      ),
                     ),
                     backgroundColor:
                         tappedLetters.last ? Colors.grey : mainButtonColor,
-                    minimumSize: const Size(double.infinity, 40),
+                    minimumSize: Size(
+                      double.infinity,
+                      getHeight(40.0),
+                    ),
                   ),
-                  child: const Text(
+                  child: Text(
                     'WORD',
-                    style: TextStyle(fontSize: 16),
+                    style: TextStyle(
+                      fontSize: getHeight(16.0),
+                    ),
                   ),
                 ),
               ),
@@ -382,14 +407,21 @@ class _AlphabetKeyPadState extends State<AlphabetKeyPad> {
             },
       style: ElevatedButton.styleFrom(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16.0),
+          borderRadius: BorderRadius.circular(
+            getRadius(16.0),
+          ),
         ),
         backgroundColor: tappedLetters[index] ? Colors.grey : mainButtonColor,
-        minimumSize: const Size(double.infinity, 40),
+        minimumSize: Size(
+          double.infinity,
+          getHeight(40.0),
+        ),
       ),
       child: Text(
         letters[index],
-        style: const TextStyle(fontSize: 16),
+        style: TextStyle(
+          fontSize: getHeight(16.0),
+        ),
       ),
     );
   }

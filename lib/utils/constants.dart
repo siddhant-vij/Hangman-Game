@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'package:hangman_game/utils/size_config.dart';
+
 const wordsFilePath = 'assets/dictionary.txt';
 
 const numberOfScoresToSave = 5;
-const minLengthEasy = 3;
-const maxLengthEasy = 6;
-const minLengthMedium = 7;
-const maxLengthMedium = 10;
-const minLengthHard = 11;
+const minLengthEasy = 4;
+const maxLengthEasy = 7;
+const minLengthMedium = 8;
+const maxLengthMedium = 11;
+const minLengthHard = 12;
 
 enum Difficulty {
   easy,
@@ -21,7 +23,7 @@ const mainButtonColor = Color(0xFF007AE2);
 const mainTextColor = Color(0xFFFFFFFF);
 
 final headerTextStyle = GoogleFonts.patrickHand(
-  fontSize: 56.0,
+  fontSize: getHeight(56.0),
   fontWeight: FontWeight.bold,
   color: mainTextColor,
   letterSpacing: 1.5,
@@ -29,7 +31,7 @@ final headerTextStyle = GoogleFonts.patrickHand(
 );
 
 final normalTextStyle = GoogleFonts.patrickHand(
-  fontSize: 32.0,
+  fontSize: getHeight(32.0),
   fontWeight: FontWeight.bold,
   color: mainTextColor,
   letterSpacing: 1.5,
@@ -37,7 +39,7 @@ final normalTextStyle = GoogleFonts.patrickHand(
 );
 
 final smallHeaderStyle = GoogleFonts.patrickHand(
-  fontSize: 24.0,
+  fontSize: getHeight(24.0),
   fontWeight: FontWeight.bold,
   color: mainTextColor,
   letterSpacing: 1.5,
@@ -45,7 +47,7 @@ final smallHeaderStyle = GoogleFonts.patrickHand(
 );
 
 final smallTextStyle = GoogleFonts.patrickHand(
-  fontSize: 16.0,
+  fontSize: getHeight(16.0),
   fontWeight: FontWeight.bold,
   color: mainTextColor,
   letterSpacing: 1.5,
@@ -53,7 +55,7 @@ final smallTextStyle = GoogleFonts.patrickHand(
 );
 
 final buttonTextStyle = GoogleFonts.patrickHand(
-  fontSize: 24.0,
+  fontSize: getHeight(24.0),
   fontWeight: FontWeight.bold,
   color: mainTextColor,
   letterSpacing: 1,
@@ -62,10 +64,12 @@ final buttonTextStyle = GoogleFonts.patrickHand(
 
 final buttonStyle = ElevatedButton.styleFrom(
   backgroundColor: mainButtonColor,
-  fixedSize: const Size(192.0, 56.0),
+  fixedSize: Size(getWidth(192.0), getHeight(56.0)),
   elevation: 6.0,
   shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(8.0),
+    borderRadius: BorderRadius.circular(
+      getRadius(8.0),
+    ),
   ),
 );
 
@@ -79,7 +83,12 @@ class SingleLineFittedText extends StatelessWidget {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         final textPainter = TextPainter(
-          text: TextSpan(text: word, style: const TextStyle(fontSize: 40.0)),
+          text: TextSpan(
+            text: word,
+            style: TextStyle(
+              fontSize: getHeight(40.0),
+            ),
+          ),
           maxLines: 1,
           textDirection: TextDirection.ltr,
         )..layout(
@@ -94,9 +103,7 @@ class SingleLineFittedText extends StatelessWidget {
             child: Text(
               word,
               style: TextStyle(
-                fontSize: fitsOnScreen
-                    ? 40.0
-                    : null,
+                fontSize: fitsOnScreen ? getHeight(40.0) : null,
                 fontWeight: FontWeight.bold,
                 color: mainTextColor,
               ),

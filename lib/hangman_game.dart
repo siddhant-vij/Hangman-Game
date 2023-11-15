@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:hangman_game/screens/home_screen.dart';
 import 'package:hangman_game/utils/constants.dart';
+import 'package:hangman_game/utils/size_config.dart';
 
 void main(List<String> args) {
   runApp(const HangmanGame());
@@ -12,12 +13,16 @@ class HangmanGame extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    SizeConfig().init(context);
+    return MaterialApp(
       home: Scaffold(
         backgroundColor: mainBackgroundColor,
         body: SafeArea(
-          minimum: EdgeInsets.symmetric(horizontal: 24.0, vertical: 48.0),
-          child: HomeScreen(),
+          minimum: EdgeInsets.symmetric(
+            horizontal: getWidth(24.0),
+            vertical: getHeight(48.0),
+          ),
+          child: const HomeScreen(),
         ),
       ),
     );

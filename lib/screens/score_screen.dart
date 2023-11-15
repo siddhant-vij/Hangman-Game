@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hangman_game/models/score.dart';
 import 'package:hangman_game/services/score_service.dart';
 import 'package:hangman_game/utils/constants.dart';
+import 'package:hangman_game/utils/size_config.dart';
 
 class ScoreScreen extends StatefulWidget {
   final Map<Difficulty, List<Score>> highScores;
@@ -77,7 +78,10 @@ class _ScoreScreenState extends State<ScoreScreen> {
             DataCell(
               Center(
                 child: Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: getWidth(8.0),
+                    vertical: getHeight(8.0),
+                  ),
                   child: Text(
                     score.date,
                     style: smallTextStyle,
@@ -88,7 +92,10 @@ class _ScoreScreenState extends State<ScoreScreen> {
             DataCell(
               Center(
                 child: Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: getWidth(8.0),
+                    vertical: getHeight(8.0),
+                  ),
                   child: Text(
                     ScoreService().getTimerInFormat(score.time),
                     style: smallTextStyle,
@@ -108,7 +115,10 @@ class _ScoreScreenState extends State<ScoreScreen> {
       home: Scaffold(
         backgroundColor: mainBackgroundColor,
         body: SafeArea(
-          minimum: const EdgeInsets.all(24.0),
+          minimum: EdgeInsets.symmetric(
+            horizontal: getWidth(24.0),
+            vertical: getHeight(24.0),
+          ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
@@ -132,7 +142,7 @@ class _ScoreScreenState extends State<ScoreScreen> {
                           : () => _changeDifficulty(false),
                       icon: Icon(
                         Icons.arrow_back,
-                        size: 32.0,
+                        size: getHeight(32.0),
                         color: _currentDifficulty == Difficulty.easy
                             ? Colors.grey
                             : mainTextColor,
@@ -148,7 +158,7 @@ class _ScoreScreenState extends State<ScoreScreen> {
                           : () => _changeDifficulty(true),
                       icon: Icon(
                         Icons.arrow_forward,
-                        size: 32.0,
+                        size: getHeight(32.0),
                         color: _currentDifficulty == Difficulty.hard
                             ? Colors.grey
                             : mainTextColor,
